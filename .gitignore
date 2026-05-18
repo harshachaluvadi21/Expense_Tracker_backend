@@ -1,0 +1,20 @@
+# Dependency directories
+node_modules/
+
+# Environment files and keys (Sensitive!)
+.env
+*.json
+!package.json
+!package-lock.json
+!vision-key.json.example
+
+# Local uploads (Stateless in production)
+uploads/*
+!uploads/.gitkeep
+
+# IDEs and system files
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.log
