@@ -14,8 +14,15 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+// Ensure uploads directory exists dynamically in production environments
+const fs = require('fs');
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Serve the uploads directory statically to access images from frontend
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 // Routes
 app.use('/api/expenses', expenseRoutes);
