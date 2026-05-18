@@ -30,7 +30,7 @@ const parseBillImage = async (imagePath) => {
       1. shopName (The name of the vendor, store, hospital, shop, restaurant, or business. Be precise. For example: "Jeevan Hospital" or "Starbucks Coffee")
       2. amount (The final total amount paid or payable as a number. Exclude currency symbols. Ensure you extract the final grand total.)
       3. date (The transaction date of the bill. Format as YYYY-MM-DD. If year is missing, assume the current year 2026. If date cannot be parsed, use today's date YYYY-MM-DD.)
-      4. category (Classify the expense into one of these: "Food", "Travel", "Shopping", "Utilities", "Entertainment", "Others".)
+      4. category (Classify the expense into one of these: "Food", "Travel", "Shopping", "Utilities", "Entertainment", "Health", "Housing", "Education", "Subscription", "Others".)
 
       Provide the output strictly as a JSON object with these keys: "shopName", "amount", "date", "category". Do not wrap the JSON output in markdown code blocks. Do not add any extra text, comments, or fields.
       
@@ -87,7 +87,7 @@ const parseBillText = async (ocrText) => {
       1. shopName (The name of the vendor, shop, restaurant, or business. Be precise.)
       2. amount (The total amount paid or payable as a number. Exclude currency symbols. Ensure you extract the final total amount.)
       3. date (The date of the bill. Format as YYYY-MM-DD. If year is missing, assume the current year 2026. If date cannot be parsed, use today's date YYYY-MM-DD.)
-      4. category (Classify the expense into one of these: "Food", "Travel", "Shopping", "Utilities", "Entertainment", "Others".)
+      4. category (Classify the expense into one of these: "Food", "Travel", "Shopping", "Utilities", "Entertainment", "Health", "Housing", "Education", "Subscription", "Others".)
 
       Provide the output strictly as a JSON object with these keys: "shopName", "amount", "date", "category". Do not wrap the JSON output in markdown code blocks. Do not add any extra text, comments, or fields.
       
