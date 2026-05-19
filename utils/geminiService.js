@@ -1,8 +1,41 @@
 const { GoogleGenAI } = require('@google/genai');
+const { wrapSDK } = require('langsmith/wrappers');
 const fs = require('fs');
 
 // Initialize Gemini client using environment variable GEMINI_API_KEY
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const baseAi = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = wrapSDK(baseAi);
+
+/**
+ * Robust wrapper to call Gemini API with fallback models if the primary model hits a rate limit or error
+ * @param {any} contents - Contents payload for generateContent
+ * @returns {Promise<object>} - Gemini response object
+ */
+const generateContentWithFallback = async (contents) => {
+  const models = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-1.5-flash'
+  ];
+
+  let lastError;
+  for (const model of models) {
+    try {
+      console.log(`[Gemini Service] Attempting generation with model: ${model}`);
+      const response = await ai.models.generateContent({
+        model: model,
+        contents: contents
+      });
+      console.log(`[Gemini Service] Successfully generated content using model: ${model}`);
+      return response;
+    } catch (error) {
+      console.warn(`[Gemini Service] Failed with model ${model}:`, error.message || error);
+      lastError = error;
+    }
+  }
+  throw lastError;
+};
 
 /**
  * Extracts structured expense data directly from receipt images using Multimodal Gemini AI
@@ -37,18 +70,15 @@ const parseBillImage = async (imagePath) => {
       Today's date is: ${new Date().toISOString().split('T')[0]}
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [
-        {
-          inlineData: {
-            data: base64Data,
-            mimeType: mimeType
-          }
-        },
-        prompt
-      ]
-    });
+    const response = await generateContentWithFallback([
+      {
+        inlineData: {
+          data: base64Data,
+          mimeType: mimeType
+        }
+      },
+      prompt
+    ]);
 
     let resultText = response.text.trim();
     
@@ -99,10 +129,7 @@ const parseBillText = async (ocrText) => {
       """
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt
-    });
+    const response = await generateContentWithFallback(prompt);
 
     let resultText = response.text.trim();
     
@@ -155,10 +182,7 @@ const generateInsights = async (expenses) => {
       ${JSON.stringify(expenses, null, 2)}
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt
-    });
+    const response = await generateContentWithFallback(prompt);
 
     return response.text.trim();
   } catch (error) {
